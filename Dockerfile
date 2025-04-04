@@ -1,6 +1,6 @@
 # Use the official Node 8 image.
-# https://hub.docker.com/_/node 
-FROM node 
+# https://hub.docker.com/_/node
+FROM node
 
 # Create and change to the app directory.
 WORKDIR /usr/src/app
@@ -14,7 +14,7 @@ COPY package*.json ./
 RUN npm install --only=production
 
 # Copy local code to the container image.
-COPY . . 
+COPY . .
 RUN chmod 777 html
 # Configure and document the service HTTP port.
 ENV PORT 8080
@@ -23,4 +23,3 @@ ENV GIT_REPO=unknown
 ENV DEBUG=express:*
 # Run the web service on container startup.
 CMD [ "/bin/sh", "start.sh" ]
-
