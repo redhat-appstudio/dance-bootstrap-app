@@ -1,25 +1,31 @@
-# Use the official Node 8 image.
-# https://hub.docker.com/_/node
-FROM node
+FROM registry.access.redhat.com/ubi9/nodejs-22:latest as builder
 
-# Create and change to the app directory.
-WORKDIR /usr/src/app
+COPY \
+    app.js \
+    package.json \
+    package-lock.json \
+    start.sh \
+    /opt/app-root/src/
 
-# Copy application dependency manifests to the container image.
-# A wildcard is used to ensure both package.json AND package-lock.json are copied.
-# Copying this separately prevents re-running npm install on every code change.
-COPY package*.json ./
+# If we combine this with the command above, the contents of the
+# directory are copied instead of the full directory.
+COPY html /opt/app-root/src/html
 
-# Install production dependencies.
-RUN npm install --only=production
+# Required for the `chmod` and the `npm install` command.
+USER root
 
-# Copy local code to the container image.
-COPY . .
-RUN chmod 777 html
+RUN chmod 777 html && npm install --only=production
+
+FROM registry.access.redhat.com/ubi9/nodejs-22-minimal:latest
+
+COPY --from=builder /opt/app-root/src /opt/app-root/src
+
 # Configure and document the service HTTP port.
 ENV PORT 8080
 EXPOSE $PORT
+
 ENV GIT_REPO=unknown
 ENV DEBUG=express:*
+
 # Run the web service on container startup.
-CMD [ "/bin/sh", "start.sh" ]
+CMD [ "/bin/sh", "/opt/app-root/src/start.sh" ]
