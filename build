@@ -1,5 +1,5 @@
 IMAGE=quay.io/redhat-appstudio/dance-bootstrap-app:latest
 
-podman build --platform linux/amd64 . -t "$IMAGE"
+podman build --no-cache --pull=always --platform linux/amd64 . -t "$IMAGE"
 podman push "$IMAGE"
 
